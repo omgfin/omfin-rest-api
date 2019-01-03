@@ -1,2 +1,366 @@
-# omfin-rest-api
+# omgfin-rest-api
 OMGFIN restful api
+
+# Public Rest API for OMGFIN (2018-10-20)
+# General API Information
+* The base endpoint is: **https://omgfin.com**
+* All endpoints return either a JSON object or array.
+* Data is returned in **ascending** order. Oldest first, newest last.
+* All time and timestamp related fields are in milliseconds.
+* HTTP `4XX` return codes are used for for malformed requests;
+  the issue is on the sender's side.
+* HTTP `429` return code is used when breaking a request rate limit.
+* HTTP `418` return code is used when an IP has been auto-banned for continuing to send requests after receiving `429` codes.
+* HTTP `5XX` return codes are used for internal errors; the issue is on
+  OMGFIN's side.
+  It is important to **NOT** treat this as a failure operation; the execution status is
+  **UNKNOWN** and could have been a success.
+* Any endpoint can return an ERROR; the error payload is as follows:
+```javascript
+{
+  "status": false,
+  "message": "Unauthorized"
+}
+```
+
+* Specific error codes and messages defined in another document.
+* For `GET` endpoints, parameters must be sent as a `query string`.
+* For `POST`, `PUT`, and `DELETE` endpoints, the parameters may be sent as a
+  `query string` or in the `request body` with content type
+  `application/x-www-form-urlencoded`. You may mix parameters between both the
+  `query string` and `request body` if you wish to do so.
+* Parameters may be sent in any order.
+* If a parameter sent in both the `query string` and `request body`, the
+  `query string` parameter will be used.
+  
+# Endpoint security type
+* Each endpoint has a security type that determines the how you will
+  interact with it.
+* API-keys are passed into the Rest API via the `X-API-KEY`
+  header.
+* API-keys and secret-keys **are case sensitive**.
+* API-keys can be configured to only access certain types of secure endpoints.
+ For example, one API-key could be used for TRADE only, while another API-key
+ can access everything except for TRADE routes.
+* By default, API-keys can access all secure routes.
+
+Security Type | Description
+------------ | ------------
+NONE | Endpoint can be accessed freely.
+TRADE | Endpoint requires sending a valid API-Key and signature.
+USER_DATA | Endpoint requires sending a valid API-Key and signature.
+USER_STREAM | Endpoint requires sending a valid API-Key.
+MARKET_DATA | Endpoint requires sending a valid API-Key.
+
+
+* `TRADE` and `USER_DATA` endpoints are `SIGNED` endpoints.
+
+# SIGNED (TRADE and USER_DATA) Endpoint security
+* `SIGNED` endpoints require an additional parameter, `signature`, to be
+  sent in the  `query string` or `request body`.
+* Endpoints use `HMAC SHA256` signatures. The `HMAC SHA256 signature` is a keyed `HMAC SHA256` operation.
+  Use your `secretKey` as the key and `totalParams` as the value for the HMAC operation.
+* The `signature` is **not case sensitive**.
+* `totalParams` is defined as the `query string` concatenated with the
+  `request body`.
+  
+## Timing security
+* A `SIGNED` endpoint also requires a parameter, `timestamp`, to be sent which
+  should be the millisecond timestamp of when the request was created and sent.
+* An additional parameter, `recvWindow`, may be sent to specify the number of
+  milliseconds after `timestamp` the request is valid for. If `recvWindow`
+  is not sent, **it defaults to 5000**.
+* The logic is as follows:
+  ```javascript
+  if (timestamp < (serverTime + 1000) && (serverTime - timestamp) <= recvWindow) {
+    // process request
+  } else {
+    // reject request
+  }
+  ```
+
+**Serious trading is about timing.** Networks can be unstable and unreliable,
+which can lead to requests taking varying amounts of time to reach the
+servers. With `recvWindow`, you can specify that the request must be
+processed within a certain number of milliseconds or be rejected by the
+server
+
+**It recommended to use a small recvWindow of 5000 or less!**
+
+# Public API Endpoints
+# ENUM definitions
+**Order status:**
+
+* NEW
+* OPEN
+* PENDING
+* FILLED
+* CANCELED
+* WAITING
+
+**Order types:**
+
+* Limit buy
+* Limit sell
+* Market buy
+* Market sell
+* Stop-limit Buy
+* Stop-limit sell
+
+**Kline/Candlestick chart intervals:**
+
+m -> minutes; h -> hours; d -> days; w -> weeks; M -> months
+
+* 1m
+* 3m
+* 5m
+* 15m
+* 30m
+* 1h
+* 2h
+* 4h
+* 6h
+* 8h
+* 12h
+* 1d
+* 3d
+* 1w
+* 1M
+
+## General endpoints
+### Test connectivity
+```
+GET /api/v1/ping
+```
+Test connectivity to the Rest API.
+
+**Weight:**
+1
+
+**Parameters:**
+NONE
+
+**Response:**
+```javascript
+{}
+```
+
+### Check server time
+```
+GET /api/v1/time
+```
+Test connectivity to the Rest API and get the current server time.
+
+**Weight:**
+1
+
+**Parameters:**
+NONE
+
+**Response:**
+```javascript
+{
+  "serverTime": 1499827319559
+}
+```
+
+## Market Data endpoints
+### Order symbols list
+```
+GET /api/v1/symbols
+```
+
+**Response:**
+```javascript
+[
+    "ETHBTC",
+    "UQCBTC",
+    "UQCETH",
+    "BCHBTC",
+    "BCHUQC",
+    "BCHETH",
+    "NEOBTC",
+    "NEOUQC",
+    "NEOETH",
+    "GASBTC",
+    "GASUQC",
+    "GASETH",
+    "XVGBTC",
+    "XVGUQC",
+    "XVGETH",
+    "BTCUSDT",
+    "ETHUSDT",
+    "UQCUSDT",
+    "BCHUSDT",
+    "NEOUSDT",
+    "GASUSDT",
+    "XVGUSDT"
+]
+```
+
+### Order book
+```
+GET /api/v1/order/book/[symbol]
+```
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+symbol | STRING | YES | ETHBTC or UQCBTC ...
+
+**Response:**
+```javascript
+{
+    "symbol": "ETHBTC",
+    "bids": [
+        {
+            "amount": "5.381762000000000000",
+            "price": "0.031487810000000000"
+        },
+        {
+            "amount": "6.095271000000000000",
+            "price": "0.031482500000000000"
+        }
+    ],
+    "asks": [
+        {
+            "amount": "6.521897000000000000",
+            "price": "0.031791820000000000"
+        },
+        {
+            "amount": "1.790562000000000000",
+            "price": "0.031878050000000000"
+        }
+    ]
+}
+```
+
+### Kline/Candlestick data
+```
+GET /api/v1/klines
+```
+Kline/candlestick bars for a symbol.
+Klines are uniquely identified by their open time.
+
+**Weight:**
+1
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+symbol | STRING | YES |
+interval | ENUM | YES |
+startTime | LONG | NO |
+endTime | LONG | NO |
+limit | INT | NO | Default 300; max 300.
+
+* If startTime and endTime are not sent, the most recent klines are returned.
+
+**Response:**
+```javascript
+[
+  {
+    "OT": 1499040000000,      // Open time
+    "O": "0.01634790",        // Open
+    "H": "0.80000000",        // High
+    "L": "0.01575800",        // Low
+    "C": "0.01577100",        // Close
+    "V": "148976.11427815",   // Volume
+    "CT": 1499644799999,      // Close time
+    "QV": "2434.19055334",    // Quote asset volume
+    "T": 308                  // Number of trades
+  }
+]
+```
+
+### 24hr ticker price change statistics
+```
+GET /api/v1/ticker/24hr/[ETHBTC]
+```
+24 hour price change statistics. **Careful** when accessing this with no symbol.
+
+**Weight:**
+1 for a single symbol; **40** when the symbol parameter is omitted
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+symbol | STRING | NO |
+
+* If the symbol is not sent, tickers for all symbols will be returned in an array.
+
+**Response:**
+```javascript
+{
+    "symbol": "ETHBTC",
+    "openPrice": "0.031785810800000000",
+    "lastPrice": "0.031558302700000000",
+    "priceChange": "-0.000227508100000000",
+    "priceChangePercent": "-0.7209136123787798004739",
+    "bidPrice": "0.031487810000000000",
+    "askPrice": "0.031788850000000000",
+    "highPrice": "0.031844763400000000",
+    "lowPrice": "0.031489325800000000",
+    "volume": "886.398512000000000000",
+    "quoteVolume": "28.037312687091148100000000000000",
+    "openTime": "1540108503106",
+    "closeTime": "1540194903106",
+    "numberOfTrades": "281"
+}
+```
+
+### Symbol price ticker
+```
+GET /api/v1/ticker/price/[symbol]
+```
+Latest price for a symbol or symbols.
+
+**Weight:**
+1
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+symbol | STRING | NO |
+
+* If the symbol is not sent, prices for all symbols will be returned in an array.
+
+**Response:**
+```javascript
+{
+    "symbol": "ETHBTC",
+    "price": "0.056700000000000000"
+}
+```
+
+### Symbol order book ticker
+```
+GET /api/v1/ticker/book/[symbol]
+```
+Best price/qty on the order book for a symbol or symbols.
+
+**Weight:**
+1
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+symbol | STRING | NO |
+
+* If the symbol is not sent, bookTickers for all symbols will be returned in an array.
+
+**Response:**
+```javascript
+{
+    "symbol": "ETHBTC",
+    "bidPrice": "0.031487810000000000",
+    "bidQty": "5.381762000000000000",
+    "askPrice": "0.031788850000000000",
+    "askQty": "1.569320000000000000"
+}
+```
