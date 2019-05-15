@@ -1,6 +1,3 @@
-# omgfin-rest-api
-OMGFIN restful api
-
 # Public Rest API for OMGFIN (2018-10-20)
 # General API Information
 * The base endpoint is: **https://omgfin.com**
@@ -200,7 +197,7 @@ GET /api/v1/symbols
 
 ### Order book
 ```
-GET /api/v1/order/book/[symbol]
+GET /api/v1/order/book/[symbol]/[limit]
 ```
 
 **Parameters:**
@@ -208,6 +205,7 @@ GET /api/v1/order/book/[symbol]
 Name | Type | Mandatory | Description
 ------------ | ------------ | ------------ | ------------
 symbol | STRING | YES | ETHBTC or UQCBTC ...
+limit | INT | NO | Default 20; max 1000. Valid limits:[5, 10, 20, 50, 100, 500, 1000]
 
 **Response:**
 ```javascript
