@@ -1,4 +1,4 @@
-# Public Rest API for OMGFIN (2018-10-20)
+# Public Rest API for OMGFIN (2019-05-15)
 # General API Information
 * The base endpoint is: **https://omgfin.com**
 * All endpoints return either a JSON object or array.
