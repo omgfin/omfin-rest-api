@@ -1,4 +1,4 @@
-# Public Rest API for OMGFIN (2019-05-15)
+# Public Rest API for OMGFIN (2019-05-16)
 # General API Information
 * The base endpoint is: **https://omgfin.com**
 * All endpoints return either a JSON object or array.
@@ -161,6 +161,35 @@ NONE
 }
 ```
 
+### Exchange information
+```
+GET /api/v1/exchangeInfo
+```
+Current exchange trading rules and symbol information
+
+**Parameters:**
+NONE
+
+**Response:**
+```javascript
+{
+  "timezone": "UTC",
+  "serverTime": 1508631584636,
+  "symbols": [{
+    "symbol": "ETHBTC",
+    "status": "TRADING",
+    "baseAsset": "ETH",
+    "baseAssetPrecision": 8,
+    "quoteAsset": "BTC",
+    "quotePrecision": 8,
+    "orderTypes": [
+      // These are defined in the `ENUM definitions` section under `Order types (orderTypes)`.
+      // All orderTypes are optional.
+    ]
+  }]
+}
+```
+
 ## Market Data endpoints
 ### Order symbols list
 ```
@@ -197,7 +226,7 @@ GET /api/v1/symbols
 
 ### Order book
 ```
-GET /api/v1/order/book/[symbol]/[limit]
+GET /api/v1/order/book
 ```
 
 **Parameters:**
@@ -206,6 +235,11 @@ Name | Type | Mandatory | Description
 ------------ | ------------ | ------------ | ------------
 symbol | STRING | YES | ETHBTC or UQCBTC ...
 limit | INT | NO | Default 20; max 1000. Valid limits:[5, 10, 20, 50, 100, 500, 1000]
+
+**example:**
+```javascript
+https://omgfin.com/api/v1/order/book?symbol=ETHBTC&limit=20
+```
 
 **Response:**
 ```javascript
@@ -249,12 +283,17 @@ Klines are uniquely identified by their open time.
 Name | Type | Mandatory | Description
 ------------ | ------------ | ------------ | ------------
 symbol | STRING | YES |
-interval | ENUM | YES |
+interval | ENUM | YES | 1m, 1h, 1d, 1w, 1y
 startTime | LONG | NO |
 endTime | LONG | NO |
 limit | INT | NO | Default 300; max 300.
 
 * If startTime and endTime are not sent, the most recent klines are returned.
+
+**example:**
+```javascript
+https://omgfin.com/api/v1/klines?symbol=ETHBTC&interval=4h&startTime=1531972492000&endTime=1539921292000
+```
 
 **Response:**
 ```javascript
@@ -273,9 +312,103 @@ limit | INT | NO | Default 300; max 300.
 ]
 ```
 
+### Recent trades list
+```
+GET /api/v1/trades
+```
+Get recent trades (up to last 500).
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+symbol | STRING | YES |
+limit | INT | NO | Default 500; max 1000.
+
+**example:**
+```javascript
+https://omgfin.com/api/v1/trades?symbol=ETHBTC&limit=20
+```
+
+**Response:**
+```javascript
+[
+  {
+    "id": 28457,
+    "price": "4.00000100",
+    "qty": "12.00000000",
+    "time": 1499865549590,
+    "isBuyerMaker": true,
+    "isBestMatch": true
+  }
+]
+```
+
+### Compressed/Aggregate trades list
+```
+GET /api/v1/aggTrades
+```
+Get compressed, aggregate trades. Trades that fill at the time, from the same
+order, with the same price will have the quantity aggregated.
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+symbol | STRING | YES |
+startTime | LONG | NO | Timestamp in ms to get aggregate trades.
+endTime | LONG | NO | Timestamp in ms to get aggregate trades.
+limit | INT | NO | Default 500; max 1000.
+
+**example:**
+```javascript
+https://omgfin.com/api/v1/aggTrades?symbol=ETHBTC&limit=20
+```
+
+**Response:**
+```javascript
+[
+  {
+    "a": 26129,         // Aggregate tradeId
+    "p": "0.01633102",  // Price
+    "q": "4.70443515",  // Quantity
+    "f": 27781,         // First tradeId
+    "l": 27781,         // Last tradeId
+    "T": 1498793709153, // Timestamp
+    "m": true,          // Was the buyer the maker?
+    "M": true           // Was the trade the best price match?
+  }
+]
+```
+
+### Current average price
+Current average price for a symbol.
+```
+GET /api/v1/avgPrice
+```
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+symbol | STRING | YES |
+
+**example:**
+```javascript
+https://omgfin.com/api/v1/avgPrice?symbol=ETHBTC
+```
+
+**Response:**
+```javascript
+{
+  "mins": 5,
+  "price": "9.35751834"
+}
+```
+
 ### 24hr ticker price change statistics
 ```
-GET /api/v1/ticker/24hr/[ETHBTC]
+GET /api/v1/ticker/24hr
 ```
 24 hour price change statistics. **Careful** when accessing this with no symbol.
 
@@ -290,10 +423,15 @@ symbol | STRING | NO |
 
 * If the symbol is not sent, tickers for all symbols will be returned in an array.
 
+**example:**
+```javascript
+https://omgfin.com/api/v1/ticker/24hr?symbol=ETHBTC
+```
+
 **Response:**
 ```javascript
 {
-    "symbol": "ETHBTC",
+    "symbol": "ETH_BTC",
     "openPrice": "0.031785810800000000",
     "lastPrice": "0.031558302700000000",
     "priceChange": "-0.000227508100000000",
@@ -312,7 +450,7 @@ symbol | STRING | NO |
 
 ### Symbol price ticker
 ```
-GET /api/v1/ticker/price/[symbol]
+GET /api/v1/ticker/price
 ```
 Latest price for a symbol or symbols.
 
@@ -327,17 +465,22 @@ symbol | STRING | NO |
 
 * If the symbol is not sent, prices for all symbols will be returned in an array.
 
+**example:**
+```javascript
+https://omgfin.com/api/v1/ticker/price?symbol=ETHBTC
+```
+
 **Response:**
 ```javascript
 {
-    "symbol": "ETHBTC",
+    "symbol": "ETH_BTC",
     "price": "0.056700000000000000"
 }
 ```
 
 ### Symbol order book ticker
 ```
-GET /api/v1/ticker/book/[symbol]
+GET /api/v1/ticker/book
 ```
 Best price/qty on the order book for a symbol or symbols.
 
@@ -352,13 +495,20 @@ symbol | STRING | NO |
 
 * If the symbol is not sent, bookTickers for all symbols will be returned in an array.
 
+**example:**
+```javascript
+https://omgfin.com/api/v1/ticker/book?symbol=ETHBTC
+```
+
 **Response:**
 ```javascript
 {
-    "symbol": "ETHBTC",
+    "symbol": "ETH_BTC",
     "bidPrice": "0.031487810000000000",
     "bidQty": "5.381762000000000000",
     "askPrice": "0.031788850000000000",
     "askQty": "1.569320000000000000"
 }
 ```
+
+
