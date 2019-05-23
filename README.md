@@ -1,4 +1,4 @@
-# Public Rest API for OMGFIN (2019-05-16)
+# Public Rest API for OMGFIN (2019-05-23)
 # General API Information
 * The base endpoint is: **https://omgfin.com**
 * All endpoints return either a JSON object or array.
@@ -29,7 +29,12 @@
 * Parameters may be sent in any order.
 * If a parameter sent in both the `query string` and `request body`, the
   `query string` parameter will be used.
-  
+
+# Query limitation
+* For `GET` endpoints, request limitation number: 10 per second.
+* For `POST`, `PUT`, and `DELETE` endpoints, request limitation number: 3 per second.
+* A 401 `HTTP` error will be returned at over limit of limitation.
+
 # Endpoint security type
 * Each endpoint has a security type that determines the how you will
   interact with it.
