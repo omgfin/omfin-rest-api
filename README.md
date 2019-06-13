@@ -199,8 +199,8 @@ NONE
 GET /api/v1/coinInfo/[symbol]
 ```
 Current exchange symbol information
-
 **Parameters:**
+
 Name | Type | Mandatory | Description
 ------------ | ------------ | ------------ | ------------
 symbol | STRING | NO | BTC ...
