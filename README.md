@@ -1,4 +1,4 @@
-# Public Rest API for OMGFIN (2019-05-23)
+# Public Rest API for OMGFIN (2019-06-13)
 # General API Information
 * The base endpoint is: **https://omgfin.com**
 * All endpoints return either a JSON object or array.
@@ -193,6 +193,39 @@ NONE
     ]
   }]
 }
+```
+
+```
+GET /api/v1/coinInfo/[symbol]
+```
+Current exchange symbol information
+
+**Parameters:**
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+symbol | STRING | NO | BTC ...
+
+* If the symbol is not sent, config for all symbols will be returned in an array.
+
+**example:**
+```javascript
+https://omgfin.com/api/v1/coinInfo/BTC
+```
+
+**Response:**
+```javascript
+[
+  {
+    "symbol": "BTC",
+    "name": "Bitcoin",
+    "active": true,
+    "icon_path": "https://static.omgfin.com/omgfin/img/icon/btc.png",
+    "can_deposit": true,
+    "can_withdraw": true,
+    "project_url": "https://bitcoin.org/",
+    "coin_description": "\n\tBitcoin is the first cryptocurrency ever created. It is, basically, a digital form of money that is highly resistant to frauds and cannot be copied or destroyed. Computer and network technologies have advanced to its current state through one universal property of digital information: most of it can be easily copied. \n\n\tThe fast creation of pretty much everything, from the web to word processors to network programming, relies on the fact that a series of bits can be quickly and easily copied at close to zero cost. It was only a matter of time before computer scientists and developers started to wonder about the other half of the data economy. \n\n\tWhat if data couldn&rsquo;t be copied? What if there were such a thing as a unique piece of data, and what if it could be transmitted from user to user? The practical ramifications were pretty clear right off the bat. Unique data that can&#39;t be copied could be used as digital money. That is how the first cryptocurrency was invented. Most people have little or no experience with this particular kind of digital currencies, so they might ask &quot;what is Bitcoin?&quot; or might want to know how Bitcoin works. \n\n\tThe underlying technology that makes cryptocurrencies so unique is probably one of the most complex topics to the majority of us. Due to its various qualities and functionalities, Bitcoin as a word may be used to define many different things. First, Bitcoin as a cryptocurrency (BTC) is a distributed peer-to-peer (P2P) digital form of money. Second, this digital economic network is operated by an underlying set of rules, the Bitcoin Protocol. Third, the source code for such protocol and the respective software - which is running on many computers worldwide - may also be referred to as Bitcoin. Therefore, the word Bitcoin may be used to refer to the whole ecosystem, encompassing all the above-mentioned functionalities.\n"
+  }
+]
 ```
 
 ## Market Data endpoints
