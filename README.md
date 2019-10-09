@@ -1,4 +1,5 @@
-# Public Rest API for OMGFIN (2019-06-13)
+# Public Rest API for OMGFIN (2019-10-09)
+# Public Rest API for OMGFIN (2018-10-20)
 # General API Information
 * The base endpoint is: **https://omgfin.com**
 * All endpoints return either a JSON object or array.
@@ -35,6 +36,7 @@
 * For `POST`, `PUT`, and `DELETE` endpoints, request limitation number: 3 per second.
 * A 401 `HTTP` error will be returned at over limit of limitation.
 
+  
 # Endpoint security type
 * Each endpoint has a security type that determines the how you will
   interact with it.
@@ -199,6 +201,8 @@ NONE
 GET /api/v1/coinInfo/[symbol]
 ```
 Current exchange symbol information
+
+
 **Parameters:**
 
 Name | Type | Mandatory | Description
@@ -260,6 +264,50 @@ GET /api/v1/symbols
     "GASUSDT",
     "XVGUSDT"
 ]
+```
+
+### Order book
+```
+GET /api/v1/orderbook/[market_pair]
+```
+
+**Parameters:**
+
+Name | Type | Mandatory | Description
+------------ | ------------ | ------------ | ------------
+market_pair | STRING | YES | ETHBTC or UQCBTC ...
+limit | INT | NO | Default 20; max 500. Valid limits:[5, 10, 20, 50, 100, 500]
+
+**example:**
+```javascript
+https://omgfin.com/api/v1/orderbook/ETH_BTC?limit=20
+```
+
+**Response:**
+```javascript
+{
+  "timestamp": 1570591063,
+  "bids": [
+    [
+      "8076.41",
+      "1.65919412"
+    ],
+    [
+      "8073.41",
+      "1.45492549"
+    ]
+  ],
+  "asks": [
+    [
+      "8283.3",
+      "1.42864519"
+    ],
+    [
+      "8339.11",
+      "1.16695773"
+    ]
+  ]
+}
 ```
 
 ### Order book
@@ -352,7 +400,7 @@ https://omgfin.com/api/v1/klines?symbol=ETHBTC&interval=4h&startTime=15319724920
 
 ### Recent trades list
 ```
-GET /api/v1/trades
+GET /api/v1/trades/[symbol]
 ```
 Get recent trades (up to last 500).
 
@@ -365,6 +413,8 @@ limit | INT | NO | Default 500; max 1000.
 
 **example:**
 ```javascript
+https://omgfin.com/api/v1/trades/ETH_BTC?limit=20
+or
 https://omgfin.com/api/v1/trades?symbol=ETHBTC&limit=20
 ```
 
@@ -441,6 +491,101 @@ https://omgfin.com/api/v1/avgPrice?symbol=ETHBTC
 {
   "mins": 5,
   "price": "9.35751834"
+}
+```
+
+### Overview of market data for all tickers
+```
+GET /api/v1/ticker/summary
+```
+Overview of market data for all tickers.
+
+**example:**
+```javascript
+https://omgfin.com/api/v1/ticker/summary
+```
+
+**Response:**
+```javascript
+{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "BTC_USDT": {
+      "last": "7940.98",
+      "lowestAsk": "8007.16",
+      "highestBid": "7909.22",
+      "percentChange": "0",
+      "baseVolume": "1.85044979",
+      "quoteVolume": "14694.3847733942",
+      "high24hr": "7940.98",
+      "low24hr": "7940.98"
+    }
+  }
+}
+```
+
+### The assets for each currency available on the exchange
+```
+GET /api/v1/ticker/summary
+```
+The assets endpoint is to provide a detailed summary for each currency available on the exchange.
+
+**example:**
+```javascript
+https://omgfin.com/api/v1/assets
+```
+
+**Response:**
+```javascript
+{
+  "BTC": {
+    "name": "Bitcoin",
+    "unified_cryptoasset_id": 1,
+    "can_withdraw": "true",
+    "can_deposit": "true",
+    "min_withdraw": "0.002",
+    "max_withdraw": "10",
+    "maker_fee": "0.001",
+    "taker_fee": "0"
+  },
+  "ETH": {
+    "name": "Ethereum",
+    "unified_cryptoasset_id": 1027,
+    "can_withdraw": "true",
+    "can_deposit": "true",
+    "min_withdraw": "0.02",
+    "max_withdraw": "50",
+    "maker_fee": "0.001",
+    "taker_fee": "0"
+  }
+}
+```
+
+### 24hr ticker price and volume each market pair available on the exchange
+```
+GET /api/v1/ticker
+```
+The ticker endpoint is to provide a 24-hour pricing and volume summary for each market pair available on the exchange.
+
+**Weight:**
+1 for a single symbol; **40** when the symbol parameter is omitted
+
+**example:**
+```javascript
+https://omgfin.com/api/v1/ticker
+```
+
+**Response:**
+```javascript
+{
+  "BTC_USDT": {
+    "base_id": 1,
+    "quote_id": 825,
+    "last_price": "8148.28",
+    "base_volume": "3.66948109",
+    "quote_volume": "29516.3611345582"
+  }
 }
 ```
 
@@ -548,5 +693,6 @@ https://omgfin.com/api/v1/ticker/book?symbol=ETHBTC
     "askQty": "1.569320000000000000"
 }
 ```
+
 
 
