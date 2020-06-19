@@ -310,49 +310,6 @@ https://omgfin.com/api/v1/orderbook/ETH_BTC?limit=20
 }
 ```
 
-### Order book
-```
-GET /api/v1/order/book
-```
-
-**Parameters:**
-
-Name | Type | Mandatory | Description
------------- | ------------ | ------------ | ------------
-symbol | STRING | YES | ETHBTC or UQCBTC ...
-limit | INT | NO | Default 20; max 1000. Valid limits:[5, 10, 20, 50, 100, 500, 1000]
-
-**example:**
-```javascript
-https://omgfin.com/api/v1/order/book?symbol=ETHBTC&limit=20
-```
-
-**Response:**
-```javascript
-{
-    "symbol": "ETHBTC",
-    "bids": [
-        {
-            "amount": "5.381762000000000000",
-            "price": "0.031487810000000000"
-        },
-        {
-            "amount": "6.095271000000000000",
-            "price": "0.031482500000000000"
-        }
-    ],
-    "asks": [
-        {
-            "amount": "6.521897000000000000",
-            "price": "0.031791820000000000"
-        },
-        {
-            "amount": "1.790562000000000000",
-            "price": "0.031878050000000000"
-        }
-    ]
-}
-```
 
 ### Kline/Candlestick data
 ```
