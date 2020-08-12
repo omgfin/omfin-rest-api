@@ -1,4 +1,4 @@
-#Last updated: Public Rest API for OMGFIN (2019-10-09)
+#Last updated: Public Rest API for OMGFIN (2020-12-08)
 #From: Public Rest API for OMGFIN (2018-10-20)
 # General API Information
 * The base endpoint is: **https://omgfin.com**
@@ -429,7 +429,7 @@ https://omgfin.com/api/v1/aggTrades?symbol=ETHBTC&limit=20
 ### Current average price
 Current average price for a symbol.
 ```
-GET /api/v1/avgPrice
+GET /api/v1/avgprice
 ```
 
 **Parameters:**
@@ -440,7 +440,7 @@ symbol | STRING | YES |
 
 **example:**
 ```javascript
-https://omgfin.com/api/v1/avgPrice?symbol=ETHBTC
+https://omgfin.com/api/v1/avgprice?symbol=ETHBTC
 ```
 
 **Response:**
